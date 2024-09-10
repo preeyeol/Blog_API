@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
-
-const authenticateToken=(req, res, next) =>{
+const userSchema= require("./../model/userSchema")
+const authenticateToken=async (req, res, next) =>{
     try{
         const authHeader = req.headers['authorization'];
         console.log(authHeader)
@@ -16,13 +16,16 @@ const authenticateToken=(req, res, next) =>{
           return res.status(401).json({ message: 'Token not found' });
         }
     
-  jwt.verify(token, process.env.jwt_secret, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid token' });
-    }
-    req.user = user; 
+  
+  
+  const decoded=jwt.verify(token, process.env.jwt_secret)
+   const user=await userSchema.findOne({
+    _id:decoded.id
+   })
+  
+  req.user = user; 
     next();
-  });}catch(err){
+}catch(err){
     res.status(400).json({
         err
     })

@@ -7,6 +7,13 @@ const post=mongoose.Schema(
         createdAt:{ type: Date,
             default:new Date}, // Timestamp when the post was created
         // author: String, // ID or username of the user who created the post (required)
+
+        authorId:{
+             type: mongoose.Schema.Types.ObjectId,
+            ref:"user",
+            require:true
+
+        }
     // you can add more fields  
 })
 

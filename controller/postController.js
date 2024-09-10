@@ -2,25 +2,28 @@ const postSchema=require("../model/postSchema");
 
 
 const allPost= async(req,res)=>{
-    const posts= await postSchema.find({})
+    const posts= await postSchema.find({}).populate("authorId")
 
     res.json({posts})
 }
 
 
 const createPost =async (req,res)=>{
+    const user=req.user;
+    console.log(user)
 try{const {title,body}= req.body;
 
 const newPost= await new postSchema({
     title:title,
-    body:body
+    body:body,
+    authorId:user._id
 })
 
 const savedPost=await newPost.save();
 
 res.status(200).json({
     msg:"Post Created",
-    post: savedPost
+    post: newPost
 })
 
 }catch(err){
