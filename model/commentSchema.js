@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 
-const post = mongoose.Schema({
-  title: String, // Title of the blog post (required)
-  body: String, // Content of the blog post (required)
+const comment = mongoose.Schema({
+  text: {
+    type: String,
+    required: true,
+  },
+  // Content of the blog post (required)
   createdAt: { type: Date, default: new Date() }, // Timestamp when the post was created
   // author: String, // ID or username of the user who created the post (required)
 
@@ -10,15 +13,13 @@ const post = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  comment: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "comment",
-    },
-  ],
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "post",
+  },
   // you can add more fields
 });
 
-const postSchema = mongoose.model("post", post);
+const commentSchema = mongoose.model("comment", comment);
 
-module.exports = postSchema;
+module.exports = commentSchema;

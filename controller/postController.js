@@ -1,62 +1,80 @@
-const postSchema=require("../model/postSchema");
+const postSchema = require("../model/postSchema");
 
+const allPost = async (req, res) => {
+  const posts = await postSchema.find({}).populate("authorId");
 
-const allPost= async(req,res)=>{
-    const posts= await postSchema.find({}).populate("authorId")
+  res.json({ posts });
+};
 
-    res.json({posts})
-}
+const createPost = async (req, res) => {
+  const user = req.user;
+  console.log(user);
+  try {
+    const { title, body } = req.body;
 
+    const newPost = await new postSchema({
+      title: title,
+      body: body,
+      authorId: user._id,
+    });
 
-const createPost =async (req,res)=>{
-    const user=req.user;
-    console.log(user)
-try{const {title,body}= req.body;
+    const savedPost = await newPost.save();
 
-const newPost= await new postSchema({
-    title:title,
-    body:body,
-    authorId:user._id
-})
+    res.status(200).json({
+      msg: "Post Created",
+      post: newPost,
+    });
+  } catch (err) {
+    res.status(400).json({ err });
+  }
+};
 
-const savedPost=await newPost.save();
+const deletePost = async (req, res) => {
+  const id = req.params.id;
+  await postSchema.deleteOne({ _id: id });
 
-res.status(200).json({
-    msg:"Post Created",
-    post: newPost
-})
+  res.json({
+    msg: "Deleted Successfully",
+  });
+};
 
-}catch(err){
-    res.status(400).json({err})
-}
-}
+const updatePost = async (req, res) => {
+  const id = req.params.id;
 
-const deletePost= async(req,res)=>{
- const id=req.params.id;
-await postSchema.deleteOne({_id:id})
-
- res.json({
-    msg:"Deleted Successfully"
- })
-
-}
-
-const updatePost= async (req,res)=>{
-
-    const id=req.params.id;
-
-  const update=  await postSchema.updateOne({_id:id},{$set:{
+  const update = await postSchema.updateOne(
+    { _id: id },
+    {
+      $set: {
         title: req.body.title,
-        body:req.body.body
+        body: req.body.body,
+      },
+    }
+  );
 
-    }})
+  res.json({
+    msg: "Updated successfully",
+  });
+};
 
-    res.json({
-        msg:"Updated successfully"
-    })
-}
+const getAllCommentsInPost = async (req, res) => {
+  const postId = req.params.id;
 
+  // const posts = await postSchema.findById(postId).populate("comment", "text");
+  const posts = await postSchema.findById(postId).populate({
+    path: "comment",
+    select: "text",
+    populate: {
+      path: "authorId",
+      select: "username email",
+    },
+  });
+  res.json(posts);
+};
 
-
-
-module.exports= {createPost,deletePost,updatePost,allPost}
+module.exports = {
+  createPost,
+  deletePost,
+  updatePost,
+  allPost,
+  getAllCommentsInPost,
+};
